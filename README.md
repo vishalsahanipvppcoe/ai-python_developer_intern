@@ -1,134 +1,141 @@
 # AI-Powered Task Management System
 
-A production-grade Python backend built with **FastAPI**, **PostgreSQL**, **SQLAlchemy**, **Alembic**, and **Google Gemini AI**. The application provides secure user authentication, role-based access control (RBAC), task lifecycle management, and automated task description generation powered by AI.
+**Submission for**: Kanishka Software Pvt Ltd — Python & AI Integration Intern (24-Hour Assessment)  
+**Candidate**: Vishal Sahani  
+**Degree**: B.E. Information Technology (Graduation Year: 2027)  
+**GitHub Repository**: [https://github.com/vishalsahanipvppcoe/ai-python_developer_intern](https://github.com/vishalsahanipvppcoe/ai-python_developer_intern)  
 
 ---
 
-## 1. Technology Stack
+## 1. Project Overview
 
-- **Framework**: [FastAPI](https://fastapi.tiangolo.com/) (Python 3.10+)
-- **Server**: [Uvicorn](https://www.uvicorn.org/) (ASGI server)
-- **Database**: [PostgreSQL](https://www.postgresql.org/) (Production) & SQLite (In-Memory for unit/integration testing)
-- **ORM & Migrations**: [SQLAlchemy 2.0](https://www.sqlalchemy.org/) & [Alembic](https://alembic.sqlalchemy.org/)
+The **AI-Powered Task Management System** is a robust, production-ready backend service designed and built with **Python**, **FastAPI**, **PostgreSQL**, **SQLAlchemy ORM**, **Alembic**, and **Google Gemini AI**. 
+
+It delivers end-to-end task lifecycle management with fine-grained **Role-Based Access Control (RBAC)**, secure **OAuth2 JWT authentication**, automated **Alembic database migrations**, database **seeding**, and an intelligent **AI task description generator**.
+
+---
+
+## 2. Assessment Requirements Compliance Matrix
+
+| Requirement Area | Specification | Implementation Details | Status |
+| :--- | :--- | :--- | :--- |
+| **Technology** | Python, FastAPI, PostgreSQL, JWT, LLM API | Python 3.10+, FastAPI, PostgreSQL, `python-jose`, Google Gemini API | **100% Complete** |
+| **Users & Auth** | `users` table: id, name, email, password, role, created_at, updated_at | Bcrypt password hashing, registration, login returning JWT, `/api/auth/me` profile | **100% Complete** |
+| **Roles** | `user` and `admin` roles | Public registration defaults to `user`; RBAC route guards prevent privilege escalation | **100% Complete** |
+| **Tasks** | `tasks` table: id, user_id, title, description, status, created_at, updated_at | FK to users, statuses: `Pending`, `In Progress`, `Testing`, `Completed` | **100% Complete** |
+| **Task APIs** | Create, List, View, Update, Update Status | REST endpoints under `/api/tasks` with status codes 201, 200, 401, 403, 404, 422 | **100% Complete** |
+| **Access Control** | Users manage own tasks; cannot update status. Admin manages all and updates status. | Enforced in `app/services/task.py` and `app/api/task.py` with 403 HTTP exceptions | **100% Complete** |
+| **AI Integration** | `POST /api/tasks/generate-description` | Isolated in `app/ai/gemini.py`, handles 429, 502, 503, 504 errors gracefully | **100% Complete** |
+| **Database** | PostgreSQL + Migrations + Seeder (No bare SQL) | Alembic migration (`5bd10a5e9407_init.py`), automated seeder (`seed.py`) | **100% Complete** |
+| **API Testing** | Postman collection covering all flows | `ai_task_manager_postman.json` covers auth, tasks, RBAC, AI, and error cases | **100% Complete** |
+| **Test Suite** | Automated unit and integration tests | 39 automated tests with in-memory SQLite and mocked Gemini client | **100% Complete (39/39 Passed)** |
+
+---
+
+## 3. Technology Stack
+
+- **Backend Framework**: [FastAPI](https://fastapi.tiangolo.com/) (High-performance ASGI framework)
+- **ASGI Server**: [Uvicorn](https://www.uvicorn.org/)
+- **Database Engine**: [PostgreSQL](https://www.postgresql.org/) (Production runtime) & SQLite in-memory (Test runner)
+- **ORM**: [SQLAlchemy 2.0](https://www.sqlalchemy.org/)
+- **Database Migrations**: [Alembic](https://alembic.sqlalchemy.org/)
 - **Data Validation & Settings**: [Pydantic v2](https://docs.pydantic.dev/) & [pydantic-settings](https://github.com/pydantic/pydantic-settings)
-- **Authentication & Security**: JWT (`python-jose`), Password Hashing (`passlib` + `bcrypt`)
+- **Authentication**: JWT via [python-jose](https://python-jose.readthedocs.io/), Password Hashing via [passlib](https://passlib.readthedocs.io/) and `bcrypt`
 - **AI Integration**: [Google Gemini API](https://ai.google.dev/) (`google-generativeai`)
-- **Testing**: [Pytest](https://pytest.org/) & [HTTPX](https://www.python-httpx.org/)
+- **Automated Testing**: [pytest](https://pytest.org/) and [HTTPX](https://www.python-httpx.org/)
 
 ---
 
-## 2. Feature List
-
-- **User Authentication**:
-  - Secure registration with email validation and minimum password complexity (>= 8 characters).
-  - Password hashing with Bcrypt.
-  - OAuth2 Password Bearer flow issuing JSON Web Tokens (JWT).
-  - Protected current-user endpoint (`GET /api/auth/me`).
-- **Role-Based Access Control (RBAC)**:
-  - Users are assigned `user` (default) or `admin` roles.
-  - Regular users can view, create, and update only their own tasks.
-  - Administrators can inspect all tasks across all users and modify any task.
-  - Task status transition (`Pending`, `In Progress`, `Testing`, `Completed`) is strictly restricted to administrator privileges.
-- **AI-Powered Task Descriptions**:
-  - `POST /api/tasks/generate-description` creates concise, professional task descriptions using Google Gemini.
-  - Robust exception handling for rate limits (429), timeouts (504), upstream failures (502), and unconfigured keys (503).
-  - Generated descriptions are returned directly without creating persistent task records unless requested.
-- **Automated Database Migrations**:
-  - Version-controlled schema migrations using Alembic.
-  - Offline SQL generation supported.
-- **Comprehensive Automated Testing**:
-  - 39 automated tests covering authentication, RBAC, CRUD operations, edge cases, validation, and Gemini AI mocking.
-  - 100% isolated test database using in-memory SQLite with `StaticPool`.
-
----
-
-## 3. Project Structure
+## 4. Project Directory Structure
 
 ```text
-ai-task-manager/
-├── alembic/                      # Alembic migration environment
-│   ├── versions/                 # Versioned migration scripts
-│   │   └── 5bd10a5e9407_init.py  # Initial database schema migration
-│   ├── env.py                    # Migration runtime configuration
-│   └── script.py.mako            # Template for new migrations
+ai-python_developer_intern/
+├── alembic/                      # Alembic schema migrations
+│   ├── versions/                 # Versioned database migration scripts
+│   │   └── 5bd10a5e9407_init.py  # Initial migration (users & tasks tables)
+│   ├── env.py                    # Migration environment and model binding
+│   └── script.py.mako            # Migration template
 ├── app/                          # Core application package
-│   ├── ai/                       # AI integrations
-│   │   └── gemini.py             # Google Gemini client and error handling
-│   ├── api/                      # FastAPI route controllers
-│   │   ├── auth.py               # Authentication routes (/api/auth)
-│   │   └── task.py               # Task management routes (/api/tasks)
-│   ├── auth/                     # Security and authorization layer
-│   │   ├── dependencies.py       # Auth dependencies (get_current_user, get_current_admin_user)
-│   │   └── security.py           # Password hashing & JWT generation/verification
-│   ├── database/                 # Database connection and session management
+│   ├── ai/                       # AI service layer
+│   │   ├── __init__.py
+│   │   └── gemini.py             # Google Gemini client and robust error handling
+│   ├── api/                      # REST API routing controllers
+│   │   ├── __init__.py
+│   │   ├── auth.py               # Authentication endpoints (/api/auth)
+│   │   └── task.py               # Task management endpoints (/api/tasks)
+│   ├── auth/                     # Security, hashing, and token dependencies
+│   │   ├── __init__.py
+│   │   ├── dependencies.py       # Current user & Admin RBAC route guards
+│   │   └── security.py           # Bcrypt password hashing & JWT encoding/decoding
+│   ├── database/                 # Database connection & session lifecycle
+│   │   ├── __init__.py
 │   │   ├── base.py               # Declarative Base
-│   │   └── session.py            # Engine and SessionLocal session factory
+│   │   └── session.py            # Engine, SessionLocal, and get_db dependency
 │   ├── models/                   # SQLAlchemy ORM models
+│   │   ├── __init__.py
 │   │   ├── task.py               # Task model & StatusEnum
 │   │   └── user.py               # User model & RoleEnum
-│   ├── schemas/                  # Pydantic schemas (request/response validation)
+│   ├── schemas/                  # Pydantic schemas (Request / Response DTOs)
+│   │   ├── __init__.py
 │   │   ├── task.py               # TaskCreate, TaskUpdate, TaskStatusUpdate, TaskOut
-│   │   ├── token.py              # Token, TokenData schemas
+│   │   ├── token.py              # Token schemas
 │   │   └── user.py               # UserCreate, UserOut schemas
-│   ├── services/                 # Business logic service layer
-│   │   ├── task.py               # Task CRUD & authorization checks
-│   │   └── user.py               # User creation & authentication logic
+│   ├── services/                 # Business logic layer
+│   │   ├── __init__.py
+│   │   ├── task.py               # Task CRUD & authorization validation
+│   │   └── user.py               # User creation & credential authentication
 │   └── main.py                   # FastAPI application initialization & routing
-├── tests/                        # Automated test suite
-│   ├── conftest.py               # Pytest fixtures, mock DB setup, shared auth tokens
-│   ├── test_ai.py                # AI endpoint tests with Gemini mocks
-│   ├── test_auth.py              # User registration, login, and JWT tests
-│   └── test_task.py              # Task CRUD, ownership, and RBAC tests
-├── .env.example                  # Environment configuration template (placeholders only)
-├── .gitignore                    # Git exclusions (.env, .venv, *.db, pycache)
+├── tests/                        # Automated Pytest test suite
+│   ├── conftest.py               # Test database fixtures, mock client & tokens
+│   ├── test_ai.py                # AI endpoint tests & mocked failure conditions
+│   ├── test_auth.py              # Registration, login, and JWT validation tests
+│   └── test_task.py              # Task CRUD, ownership, and admin RBAC tests
+├── .env.example                  # Environment variable template with placeholders
+├── .gitignore                    # Git exclusions (.env, .venv, *.db, caches)
 ├── alembic.ini                   # Alembic configuration
-├── ai_task_manager_postman.json  # Postman API Collection
-├── requirements.txt              # Production and development dependencies
-├── seed.py                       # Database seeder (admin, user, sample tasks)
-└── README.md                     # Project documentation
+├── ai_task_manager_postman.json  # Comprehensive Postman API collection
+├── requirements.txt              # Project dependencies
+├── seed.py                       # Automated database seeder (admin, user, sample tasks)
+├── verify_config.py              # Environment configuration audit tool
+└── README.md                     # Comprehensive project documentation
 ```
 
 ---
 
-## 4. Prerequisites
+## 5. Prerequisites & Environment Setup
 
-- **Python**: Version 3.10 to 3.14
-- **PostgreSQL**: Version 13+ (or another running instance)
-- **Git**: Installed and configured on your system
+### Prerequisites
+- **Python**: Version 3.10, 3.11, or 3.12 recommended
+- **PostgreSQL**: Version 13+ running locally or remotely
+- **Git**: Installed on your system
 
----
-
-## 5. Setup and Installation
-
-### Step 1: Clone the Repository
-
+### Step 1: Clone Repository
 ```bash
-git clone <repository-url>
-cd ai-task-manager
+git clone https://github.com/vishalsahanipvppcoe/ai-python_developer_intern.git
+cd ai-python_developer_intern
 ```
 
-### Step 2: Create and Activate Virtual Environment
+### Step 2: Create & Activate Virtual Environment
 
-**On Windows (PowerShell):**
+**Windows (PowerShell):**
 ```powershell
 python -m venv .venv
-.venv\Scripts\Activate.ps1
+.\.venv\Scripts\Activate.ps1
 ```
 
-**On Windows (Command Prompt):**
+**Windows (Command Prompt):**
 ```cmd
 python -m venv .venv
-.venv\Scripts\activate.bat
+.\.venv\Scripts\activate.bat
 ```
 
-**On Linux / macOS:**
+**Linux / macOS:**
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
 ```
 
 ### Step 3: Install Dependencies
-
 ```bash
 python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
@@ -138,84 +145,86 @@ python -m pip install -r requirements.txt
 
 ## 6. Environment Configuration
 
-1. Copy `.env.example` to `.env`:
+Copy the `.env.example` file to create your local `.env`:
 
-   ```bash
-   # Windows PowerShell
-   Copy-Item .env.example .env
+```bash
+# Windows PowerShell
+Copy-Item .env.example .env
 
-   # Linux / macOS
-   cp .env.example .env
-   ```
+# Linux / macOS
+cp .env.example .env
+```
 
-2. Open `.env` in your text editor and update the placeholders with your actual local configuration:
+Open `.env` and fill in your local settings:
 
 ```env
 # Database Configuration (PostgreSQL)
-DATABASE_URL=postgresql+psycopg2://<DB_USER>:<DB_PASSWORD>@localhost:5432/<DB_NAME>
+DATABASE_URL=postgresql+psycopg2://postgres:yourpassword@localhost:5432/ai_task_manager
 
 # Security Configuration
-SECRET_KEY=<GENERATE_A_SECURE_RANDOM_SECRET_KEY>
+SECRET_KEY=generate_a_random_secure_secret_key_here_at_least_32_characters
 ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_MINUTES=30
 
-# AI Integration
-GEMINI_API_KEY=<YOUR_GOOGLE_GEMINI_API_KEY>
+# AI Integration (Google Gemini)
+GEMINI_API_KEY=paste_your_google_gemini_api_key_here
 ```
 
-> **Security Note**: Never commit `.env` to Git. The `.gitignore` file is configured to strictly exclude `.env`.
+> **Security Note**: Never commit your `.env` file or API keys. `.env` is strictly excluded in `.gitignore`.
 
 ---
 
-## 7. Database Setup & Migrations
+## 7. Database Setup, Migrations & Seeder
 
-### Create the Database
-Ensure your PostgreSQL server is running, then create the database (e.g., via `psql` or pgAdmin):
+### Step 1: Create Database in PostgreSQL
+Ensure PostgreSQL is active, then create the database:
 ```sql
 CREATE DATABASE ai_task_manager;
 ```
 
-### Apply Database Migrations
-Run Alembic to apply schema migrations:
+### Step 2: Run Alembic Migrations
+Apply versioned migrations to generate the schema:
 ```bash
 alembic upgrade head
 ```
 
-To inspect the generated SQL offline without connecting to PostgreSQL:
+To view the generated SQL without applying it:
 ```bash
 alembic upgrade head --sql
 ```
 
-### Seed the Database
-Populate the database with default admin, standard user, and sample tasks:
+### Step 3: Seed Database with Initial Test Data
+Run the seeder script to populate default admin, standard user, and sample tasks:
 ```bash
 python seed.py
 ```
 
-**Default Seed Credentials:**
-- **Administrator**: `admin@example.com` | Password: `admin123`
-- **Standard User**: `user@example.com` | Password: `user123`
+### Seeded Test Credentials
+| Account Role | Email | Password | Allowed Capabilities |
+| :--- | :--- | :--- | :--- |
+| **Administrator** | `admin@example.com` | `admin123` | View all tasks across users, edit any task, update task status |
+| **Standard User** | `user@example.com` | `user123` | Create tasks, view/edit own tasks only; cannot update status |
 
 ---
 
 ## 8. Running the Application
 
-Start the development server with Uvicorn:
+Launch the FastAPI application using Uvicorn:
 ```bash
 uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 ```
 
-The application will be accessible at `http://127.0.0.1:8000`.
+The server starts at `http://127.0.0.1:8000`.
 
 - **Health Check**: `GET http://127.0.0.1:8000/health`
-- **Interactive Swagger Docs**: `http://127.0.0.1:8000/docs`
-- **Alternative ReDoc UI**: `http://127.0.0.1:8000/redoc`
+- **Interactive Swagger UI**: `http://127.0.0.1:8000/docs`
+- **ReDoc Documentation**: `http://127.0.0.1:8000/redoc`
 
 ---
 
-## 9. API Reference & Authentication
+## 9. API Reference & Authentication Workflow
 
-All protected endpoints require an HTTP `Authorization` header formatted as:
+All protected endpoints require an `Authorization` header:
 ```http
 Authorization: Bearer <your_access_token>
 ```
@@ -223,108 +232,193 @@ Authorization: Bearer <your_access_token>
 ### 1. Authentication Endpoints (`/api/auth`)
 
 | Method | Endpoint | Access | Description |
-|---|---|---|---|
-| `POST` | `/api/auth/register` | Public | Register new account (`name`, `email`, `password`) |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/api/auth/register` | Public | Register a new user (`name`, `email`, `password`) |
 | `POST` | `/api/auth/login` | Public | OAuth2 Form login (`username`, `password`) returning JWT token |
 | `GET` | `/api/auth/me` | Authenticated | Retrieve current user profile |
+
+**Sample Login Request (`POST /api/auth/login`):**
+```http
+Content-Type: application/x-www-form-urlencoded
+
+username=user@example.com&password=user123
+```
+
+**Sample Login Response (200 OK):**
+```json
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "token_type": "bearer"
+}
+```
+
+---
 
 ### 2. Task Management Endpoints (`/api/tasks`)
 
 | Method | Endpoint | Access | Description |
-|---|---|---|---|
-| `POST` | `/api/tasks` | Authenticated | Create a new task (`title`, `description`) |
-| `GET` | `/api/tasks` | Authenticated | List tasks (Users view their own; Admins view all) |
-| `GET` | `/api/tasks/{task_id}` | Authenticated | Retrieve a specific task by ID (Owner or Admin) |
-| `PATCH` | `/api/tasks/{task_id}` | Authenticated | Update task `title` and/or `description` (Owner or Admin) |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/api/tasks` | Authenticated | Create a task (`title`, `description`) |
+| `GET` | `/api/tasks` | Authenticated | List tasks (User: own tasks; Admin: all tasks) |
+| `GET` | `/api/tasks/{task_id}` | Authenticated | Get task by ID (Owner or Admin) |
+| `PATCH` | `/api/tasks/{task_id}` | Authenticated | Edit task title and description (Owner or Admin) |
 | `PATCH` | `/api/tasks/{task_id}/status` | **Admin Only** | Update task status (`Pending`, `In Progress`, `Testing`, `Completed`) |
 
-### 3. AI Endpoint (`/api/tasks/generate-description`)
+**Sample Create Task Request (`POST /api/tasks`):**
+```json
+{
+  "title": "Set up PostgreSQL Connection Pooling",
+  "description": "Configure SQLAlchemy pool_size and max_overflow parameters."
+}
+```
 
-| Method | Endpoint | Access | Description |
-|---|---|---|---|
-| `POST` | `/api/tasks/generate-description` | Authenticated | Generate a professional task description using Gemini AI |
+**Sample Create Task Response (201 Created):**
+```json
+{
+  "id": 1,
+  "user_id": 2,
+  "title": "Set up PostgreSQL Connection Pooling",
+  "description": "Configure SQLAlchemy pool_size and max_overflow parameters.",
+  "status": "Pending",
+  "created_at": "2026-10-10T12:00:00Z",
+  "updated_at": null
+}
+```
 
-**Request Body:**
+**Sample Status Update Request (`PATCH /api/tasks/1/status` - Admin Only):**
+```json
+{
+  "status": "Completed"
+}
+```
+
+---
+
+### 3. AI Feature (`POST /api/tasks/generate-description`)
+
+Accepts a task title and uses Google Gemini to generate a professional, concise task description.
+
+**Sample Request:**
 ```json
 {
   "title": "Build user notification subsystem"
 }
 ```
 
-**Response Body:**
+**Sample Response (200 OK):**
 ```json
 {
-  "description": "Design and implement a real-time notification subsystem supporting email and push notifications, including queue-backed event processing and rate limiting."
+  "description": "Architect and implement an asynchronous notification engine supporting email alerts and event queues with retries and rate limiting."
 }
 ```
 
+**AI Error Handling & Status Codes:**
+- `503 Service Unavailable`: Gemini API key not configured or contains placeholder text.
+- `429 Too Many Requests`: Upstream Gemini API rate limit exceeded.
+- `504 Gateway Timeout`: Upstream AI call timed out.
+- `502 Bad Gateway`: Empty response or provider communication error.
+- `422 Unprocessable Entity`: Title is empty or whitespace-only.
+
 ---
 
-## 10. Automated Testing
+## 10. Role-Based Access Control (RBAC) Matrix
 
-The automated test suite runs independently of a live PostgreSQL database and does not require an active Gemini API key. It uses in-memory SQLite (`StaticPool`) and mocks the Gemini client.
+| Operation | Regular User (`role="user"`) | Administrator (`role="admin"`) |
+| :--- | :---: | :---: |
+| Register account | Allowed (Assigned `user` role) | Admin created via seeder / DB |
+| Login & acquire JWT | Allowed | Allowed |
+| View own tasks | Allowed | Allowed |
+| View other users' tasks | **Denied (403 Forbidden)** | **Allowed** |
+| Create new tasks | Allowed | Allowed |
+| Edit own task (title/desc) | Allowed | Allowed |
+| Edit other users' tasks | **Denied (403 Forbidden)** | **Allowed** |
+| Update task status | **Denied (403 Forbidden)** | **Allowed** |
+| Call AI description API | Allowed | Allowed |
 
-Run tests using Pytest:
-```bash
-python -m pytest tests/ -v
+---
+
+## 11. Automated Test Suite Execution
+
+The automated test suite runs against an isolated in-memory SQLite database (`StaticPool`) and mocks the Google Gemini API, ensuring tests execute quickly without consuming API credits or requiring a running PostgreSQL server.
+
+Run tests:
+```powershell
+.\.venv\Scripts\python.exe -m pytest -q
 ```
 
-### Test Coverage Highlights:
-- **`tests/test_auth.py`**:
-  - Successful registration and duplicate email rejection (400)
-  - Password minimum length and email format validation (422)
-  - Successful login and invalid credentials handling (401)
-  - Missing, invalid, or malformed JWT token access checks (401)
-- **`tests/test_task.py`**:
-  - Task creation with non-empty/non-whitespace title validation
-  - Ownership restrictions: users can only view and update their own tasks (403 for unauthorized users)
-  - Admin privileges: admin can list all tasks, view any task, edit any task, and update task status
-  - Task status restriction: regular users cannot update task status (403)
-  - Status validation: invalid statuses rejected (422)
-  - Non-existent task handling (404)
-- **`tests/test_ai.py`**:
-  - Successful description generation with mocked Gemini responses
-  - Unauthenticated access rejection (401)
-  - Unconfigured or placeholder API key handling (503)
-  - Title input validation (empty and whitespace-only rejected with 422)
-  - Rate limit handling (429 `ResourceExhausted`)
-  - Upstream timeout handling (504 `DeadlineExceeded`)
-  - Upstream Google API errors (502 `GoogleAPIError`)
-  - Empty response handling (502)
+### Actual Test Results
+```text
+.......................................                                  [100%]
+39 passed, 2 warnings in 26.44s
+```
+
+### Test Coverage Breakdown:
+1. **`tests/test_auth.py`** (11 tests):
+   - User registration (201) & duplicate email prevention (400)
+   - Password minimum length (>= 8 chars) & email format validation (422)
+   - Correct credentials login & JWT issuance (200)
+   - Incorrect password / nonexistent user rejection (401)
+   - Missing token, invalid token, and expired token handling (401)
+   - `/api/auth/me` user profile extraction
+2. **`tests/test_task.py`** (18 tests):
+   - Task creation with non-empty title validation (201 & 422)
+   - User task listing (isolation) vs. Admin task listing (sees all tasks)
+   - Task retrieval by ID (Owner 200, Other User 403, Nonexistent 404)
+   - Task title/description editing (Owner 200, Admin 200, Other User 403)
+   - Task status update: Admin allows all valid statuses (`Pending`, `In Progress`, `Testing`, `Completed`)
+   - Task status update: Regular user strictly forbidden (403)
+   - Invalid status values rejected (422)
+   - Unauthenticated access rejected (401)
+3. **`tests/test_ai.py`** (10 tests):
+   - Successful description generation with mocked Gemini responses
+   - Empty or whitespace-only title validation (422)
+   - Unauthenticated AI endpoint access (401)
+   - Unconfigured / placeholder API key handling (503)
+   - Rate limit simulation (`ResourceExhausted` -> 429)
+   - Timeout simulation (`DeadlineExceeded` -> 504)
+   - Provider error simulation (`GoogleAPIError` -> 502)
+   - Empty AI response handling (502)
 
 ---
 
-## 11. Postman Collection
+## 12. Postman Collection
 
-A complete Postman collection is included in the project root:
-- File: `ai_task_manager_postman.json`
+The repository includes a ready-to-use Postman collection: `ai_task_manager_postman.json`.
 
-### Using the Collection:
-1. Open Postman and click **Import**.
-2. Select `ai_task_manager_postman.json`.
-3. Set the collection variable `base_url` to `http://localhost:8000`.
-4. Execute `Authentication -> Login User`. The Postman test script automatically captures the `access_token` and populates the `token` collection variable for all protected requests.
-
----
-
-## 12. Troubleshooting
-
-1. **`passlib` / `bcrypt` compatibility error (`ValueError: password cannot be longer than 72 bytes`)**:
-   - The project pins `bcrypt<4.0.0` in `requirements.txt` to maintain compatibility with `passlib`.
-2. **`could not connect to server: Connection refused`**:
-   - Verify that your PostgreSQL service is running and `DATABASE_URL` in `.env` points to the correct host, port, user, password, and database.
-3. **`503 Service Unavailable: Gemini API key is not configured`**:
-   - Ensure you have added a valid API key from [Google AI Studio](https://aistudio.google.com/) to `GEMINI_API_KEY` in `.env`.
-4. **Elevating a User to Admin in PostgreSQL**:
-   - Public registration assigns the `user` role by default. To make a user an administrator directly in the database:
-     ```sql
-     UPDATE users SET role = 'admin' WHERE email = 'user@example.com';
-     ```
+### How to Use:
+1. Open Postman, click **Import**, and select `ai_task_manager_postman.json`.
+2. Ensure the collection variable `base_url` is set to `http://localhost:8000`.
+3. Run `1. Authentication -> Login Regular User`. The test script automatically stores `user_token`.
+4. Run `1. Authentication -> Login Admin`. The test script automatically stores `admin_token`.
+5. Run the requests in:
+   - `2. Regular User Tasks`: Creates a task and saves `task_id`.
+   - `3. Admin Task Operations`: Demonstrates admin status updates and cross-user task management.
+   - `4. AI Integration`: Tests `POST /api/tasks/generate-description`.
+   - `5. Authorization & Error Scenarios`: Verifies 403 on user status update, 401 unauthenticated, and 422 validation errors.
 
 ---
 
-## 13. Known Limitations
+## 13. Important Architectural Decisions & Assumptions
 
-- **Email Verification & Password Reset**: The current version implements core JWT authentication without an email verification or reset token workflow.
-- **Asynchronous DB Drivers**: The current implementation uses synchronous SQLAlchemy sessions with psycopg2. High-throughput deployments can migrate to `asyncpg` and SQLAlchemy async sessions if required.
-- **Task Deletion**: Tasks can be updated and transitioned across statuses; explicit hard delete endpoints are intentionally omitted to maintain audit logs.
+1. **Separation of Concerns**:
+   - `models/`: Database schema representation.
+   - `schemas/`: Request and response validation contracts.
+   - `services/`: Business logic, domain rules, and RBAC authorization assertions.
+   - `api/`: HTTP route handlers and dependency injection.
+   - `ai/`: Encapsulated external AI communication and error mapping.
+2. **AI SDK Evaluation**:
+   - Google recently released the `google.genai` SDK while marking `google.generativeai` with a future migration advisory. The application utilizes `google-generativeai` pinned in `requirements.txt` to preserve verified stability, complete mock coverage, and 100% passing tests.
+3. **Strict RBAC Enforcement**:
+   - Standard users cannot promote themselves during registration (`role` is omitted from `UserCreate` schema and hardcoded to `user` in service logic).
+   - Updating task status is guarded by the `get_current_admin_user` dependency, returning 403 Forbidden to non-admin users.
+4. **Data Integrity & Auditability**:
+   - Tasks are managed via status transitions (`Pending` -> `In Progress` -> `Testing` -> `Completed`). Hard deletion is intentionally omitted to maintain historical task records.
+
+---
+
+## 14. Verification & Secret Protection
+
+- **No Secrets Tracked**: `.env` is verified untracked by Git; `.env.example` contains placeholders only.
+- **No Local Artifacts**: `.venv`, `__pycache__`, `.pytest_cache`, and SQLite databases are strictly ignored.
+- **Identity**: Commits are made using the verified author:  
+  `Vishal Sahani <vu4f2324152@pvppcoe.ac.in>`.

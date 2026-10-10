@@ -1,13 +1,13 @@
 {
 	"info": {
 		"_postman_id": "b34e5651-46ab-4a56-b183-b9fb0be6281e",
-		"name": "AI Task Management API",
-		"description": "Collection for the AI-Powered Task Management System.",
+		"name": "AI-Powered Task Management System - Kanishka Assessment",
+		"description": "Comprehensive Postman collection for the Kanishka Software Python & AI Integration Intern Assessment covering Authentication, RBAC, Task Management, AI Description Generation, and Authorization Failure scenarios.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
 		{
-			"name": "Authentication",
+			"name": "1. Authentication",
 			"item": [
 				{
 					"name": "Register User",
@@ -21,7 +21,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\": \"Jane Doe\",\n    \"email\": \"jane@example.com\",\n    \"password\": \"password123\"\n}"
+							"raw": "{\n    \"name\": \"Jane Developer\",\n    \"email\": \"jane@example.com\",\n    \"password\": \"securepassword123\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/auth/register",
@@ -37,7 +37,7 @@
 					}
 				},
 				{
-					"name": "Login User",
+					"name": "Login Regular User (Capture user_token)",
 					"event": [
 						{
 							"listen": "test",
@@ -45,7 +45,8 @@
 								"exec": [
 									"if (pm.response.code === 200) {",
 									"    var jsonData = pm.response.json();",
-									"    pm.collectionVariables.set(\"token\", jsonData.access_token);",
+									"    pm.collectionVariables.set(\"user_token\", jsonData.access_token);",
+									"    console.log(\"User token captured successfully\");",
 									"}"
 								],
 								"type": "text/javascript"
@@ -70,7 +71,7 @@
 								},
 								{
 									"key": "password",
-									"value": "password123",
+									"value": "securepassword123",
 									"type": "text"
 								}
 							]
@@ -89,14 +90,67 @@
 					}
 				},
 				{
-					"name": "Get Current User",
+					"name": "Login Admin (Capture admin_token)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set(\"admin_token\", jsonData.access_token);",
+									"    console.log(\"Admin token captured successfully\");",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "username",
+									"value": "admin@example.com",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "admin123",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Current User Profile (/api/auth/me)",
 					"request": {
 						"auth": {
 							"type": "bearer",
 							"bearer": [
 								{
 									"key": "token",
-									"value": "{{token}}",
+									"value": "{{user_token}}",
 									"type": "string"
 								}
 							]
@@ -119,7 +173,7 @@
 			]
 		},
 		{
-			"name": "Tasks",
+			"name": "2. Regular User Tasks",
 			"item": [
 				{
 					"name": "Create Task",
@@ -131,6 +185,7 @@
 									"if (pm.response.code === 201) {",
 									"    var jsonData = pm.response.json();",
 									"    pm.collectionVariables.set(\"task_id\", jsonData.id);",
+									"    console.log(\"Task ID captured: \" + jsonData.id);",
 									"}"
 								],
 								"type": "text/javascript"
@@ -143,7 +198,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "{{token}}",
+									"value": "{{user_token}}",
 									"type": "string"
 								}
 							]
@@ -157,7 +212,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"title\": \"Learn FastAPI\",\n    \"description\": \"Study dependency injection and routing.\"\n}"
+							"raw": "{\n    \"title\": \"Implement JWT Authentication Middleware\",\n    \"description\": \"Configure OAuth2 Bearer password flow and RS256/HS256 signature verification.\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/tasks",
@@ -172,14 +227,14 @@
 					}
 				},
 				{
-					"name": "List Tasks",
+					"name": "List Own Tasks (Regular User)",
 					"request": {
 						"auth": {
 							"type": "bearer",
 							"bearer": [
 								{
 									"key": "token",
-									"value": "{{token}}",
+									"value": "{{user_token}}",
 									"type": "string"
 								}
 							]
@@ -199,14 +254,14 @@
 					}
 				},
 				{
-					"name": "View Task",
+					"name": "View Own Task Details",
 					"request": {
 						"auth": {
 							"type": "bearer",
 							"bearer": [
 								{
 									"key": "token",
-									"value": "{{token}}",
+									"value": "{{user_token}}",
 									"type": "string"
 								}
 							]
@@ -227,14 +282,14 @@
 					}
 				},
 				{
-					"name": "Edit Task",
+					"name": "Edit Own Task (Title & Description)",
 					"request": {
 						"auth": {
 							"type": "bearer",
 							"bearer": [
 								{
 									"key": "token",
-									"value": "{{token}}",
+									"value": "{{user_token}}",
 									"type": "string"
 								}
 							]
@@ -248,7 +303,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"title\": \"Learn FastAPI Advanced\",\n    \"description\": \"Study dependency injection, routing, and background tasks.\"\n}"
+							"raw": "{\n    \"title\": \"Implement JWT Authentication & RBAC Middleware\",\n    \"description\": \"Expanded scope to include role-based route guard checks.\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/tasks/{{task_id}}",
@@ -262,16 +317,48 @@
 							]
 						}
 					}
-				},
+				}
+			]
+		},
+		{
+			"name": "3. Admin Task Operations",
+			"item": [
 				{
-					"name": "Update Task Status (Admin Only / Should Fail for User)",
+					"name": "List All Tasks (Cross-User Admin Inspection)",
 					"request": {
 						"auth": {
 							"type": "bearer",
 							"bearer": [
 								{
 									"key": "token",
-									"value": "{{token}}",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/tasks",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"tasks"
+							]
+						}
+					}
+				},
+				{
+					"name": "Admin Update Task Status to 'Completed'",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
 									"type": "string"
 								}
 							]
@@ -300,21 +387,58 @@
 							]
 						}
 					}
-				}
-			]
-		},
-		{
-			"name": "AI Integrations",
-			"item": [
+				},
 				{
-					"name": "Generate Description",
+					"name": "Admin Edit Any Task",
 					"request": {
 						"auth": {
 							"type": "bearer",
 							"bearer": [
 								{
 									"key": "token",
-									"value": "{{token}}",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Admin Reviewed: JWT Auth & RBAC Middleware\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/tasks/{{task_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"tasks",
+								"{{task_id}}"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "4. AI Integration",
+			"item": [
+				{
+					"name": "Generate Task Description (Google Gemini)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{user_token}}",
 									"type": "string"
 								}
 							]
@@ -328,7 +452,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"title\": \"Prepare project presentation\"\n}"
+							"raw": "{\n    \"title\": \"Build database migration scripts using Alembic\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/tasks/generate-description",
@@ -344,6 +468,168 @@
 					}
 				}
 			]
+		},
+		{
+			"name": "5. Authorization & Error Scenarios",
+			"item": [
+				{
+					"name": "403 Forbidden: Regular User Attempt Status Update",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{user_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"status\": \"Testing\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/tasks/{{task_id}}/status",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"tasks",
+								"{{task_id}}",
+								"status"
+							]
+						}
+					}
+				},
+				{
+					"name": "401 Unauthorized: Access Protected Route Without Token",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/tasks",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"tasks"
+							]
+						}
+					}
+				},
+				{
+					"name": "422 Unprocessable Entity: Invalid Task Status",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"status\": \"Archived\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/tasks/{{task_id}}/status",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"tasks",
+								"{{task_id}}",
+								"status"
+							]
+						}
+					}
+				},
+				{
+					"name": "422 Unprocessable Entity: Whitespace Only Task Title",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{user_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"   \",\n    \"description\": \"Invalid title test\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/tasks",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"tasks"
+							]
+						}
+					}
+				},
+				{
+					"name": "404 Not Found: Nonexistent Task Query",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{user_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/tasks/99999",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"tasks",
+								"99999"
+							]
+						}
+					}
+				}
+			]
 		}
 	],
 	"variable": [
@@ -352,7 +638,11 @@
 			"value": "http://localhost:8000"
 		},
 		{
-			"key": "token",
+			"key": "user_token",
+			"value": ""
+		},
+		{
+			"key": "admin_token",
 			"value": ""
 		},
 		{
